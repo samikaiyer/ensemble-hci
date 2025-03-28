@@ -1,24 +1,33 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { Navbar, Nav } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
+import Closets from "./Pages/Closets";
+import Post from "./Pages/Post";
+import Profile from "./Pages/Profile";
+import "./App.css"
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="app-container">
+        <div className="content">
+          <Routes>
+            <Route path="/" element={<Closets />} />
+            <Route path="/post" element={<Post />} />
+            <Route path="/profile" element={<Profile />} />
+          </Routes>
+        </div>
+
+        <Navbar className="navbar" fixed="bottom" variant="light">
+          <Nav className="w-100 d-flex justify-content-around">
+            <Nav.Link as={Link} to="/">Closets</Nav.Link>
+            <Nav.Link as={Link} to="/post">Post</Nav.Link>
+            <Nav.Link as={Link} to="/profile">Profile</Nav.Link>
+          </Nav>
+        </Navbar>
+      </div>
+    </Router>
   );
 }
 
