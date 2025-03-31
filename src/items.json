@@ -1,0 +1,27 @@
+{
+    "items": 
+    [
+        {
+            "name": "Button-Up",
+            "description": "Long-sleeved white shirt that can be tucked in",
+            "size": "S",
+            "owner": "Jenna",
+            "image": "INSERT IMAGE"
+        },
+        {
+            "name": "Slacks",
+            "description": "Black pants reaching ankles, loose-fit4444444444444444444",
+            "size": "S",
+            "owner": "Jenna",
+            "image": "INSERT IMAGE"
+        },
+        {
+            "name": "Blazer",
+            "description": "Black blazer with pockets",
+            "size": "S",
+            "owner": "Jenna",
+            "image": "INSERT IMAGE"
+        }
+    ]
+}
+    
