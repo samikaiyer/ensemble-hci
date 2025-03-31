@@ -1,10 +1,11 @@
 import React from "react";
+import ScreenHeader from "../components/ScreenHeader";
 
 function Profile() {
   return (
     <div className="page">
-      <h2>Profile</h2>
-      <p>picture and outfits and closets go here</p>
+      <ScreenHeader text="Profile" />
+      <p>picture and outfits go here</p>
     </div>
   );
 }

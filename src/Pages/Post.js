@@ -16,23 +16,27 @@ function Post() {
       <ScreenHeader text="Post an Item" />
       <div className="inputcontainer">
         <div className="individualinputs">
-          <p>Name</p>
+          <p><strong>Name</strong></p>
           <input></input>
         </div>
         <div className="individualinputs">
-          <p>Description</p>
+          <p><strong>Description</strong></p>
           <input></input>
         </div>
         <div className="individualinputs">
-          <p>Size</p>
+          <p><strong>Size</strong></p>
           <input></input>
         </div>
         <div className="individualinputs">
-          <p>Owner Name</p>
+          <p><strong>Owner Name</strong></p>
           <input></input>
         </div> 
         <div className="individualinputs">
-          <p>Choose Closets</p>
+          <p><strong>Upload Image</strong></p>
+          <input type="file" accept="image/*" />
+        </div>
+        <div className="individualinputs">
+          <p><strong>Choose Closets</strong></p>
           <Select isMulti options={closets} closeMenuOnSelect={false}> </Select>
         </div>
       </div>
