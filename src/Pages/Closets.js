@@ -5,7 +5,7 @@ import closetsData from "../closets.json";
 
 function Closets() {
   return (
-    <div className="page">
+    <div className="closetspage">
       <ScreenHeader text="Closets" />
       <div>
       {closetsData.closets.map((closet) => (

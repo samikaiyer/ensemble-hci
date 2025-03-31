@@ -5,20 +5,25 @@
     object-fit: cover;
 }
 
+.profileContainer {
+    padding-left: 7%;
+}
+
 .userInfoContainer {
-    padding-left: 10%;
-    padding-top: 10%;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   padding: 5%;
 }
 
 .outfitsContainer {
-    padding-left: 5%;
-    padding-top: 5%;
+    padding: 3%;
 }
 
 .outfitContainer {
     background-color: rgb(235, 235, 235);
-    margin-left: 0px;
-    width: 490px;
+    padding: 1%;
+    width: 100%;
     border-radius: 3%;
 }
 
@@ -28,4 +33,11 @@
     border-radius: 10%;
     margin-bottom: 10px;
     margin-top: -10px;
+    padding-right: 1%;
+    padding-left: 1%;
+}
+
+.outfitImages {
+    display: flex;
+    justify-content: center;
 }
