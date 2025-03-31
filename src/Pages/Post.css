@@ -1,0 +1,37 @@
+.clearbutton {
+    background-color: #E7D3DF;
+    color: black;
+    border-color: #E7D3DF;
+    padding: 8px 22px
+}
+
+.clearbutton:hover {
+    background-color: #D5A6C4;
+    border-color: #D5A6C4;
+}
+
+.postbutton {
+    background-color: #DF8EC1;
+    color: black;
+    border-color: #DF8EC1;
+    padding: 8px 24px
+}
+
+.postbutton:hover {
+    background-color: #D374A7;
+    border-color: #D374A7;
+}
+
+.inputcontainer {
+    padding: 5%;
+}
+
+.individualinputs {
+    padding-bottom: 3%;
+}
+
+.buttoncontainer {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}

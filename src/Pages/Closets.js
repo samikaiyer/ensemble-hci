@@ -1,12 +1,12 @@
 import React from "react";
 import Card from 'react-bootstrap/Card';
-
+import ScreenHeader from "../components/ScreenHeader";
 import closetsData from "../closets.json";
 
 function Closets() {
   return (
     <div className="page">
-      <h2>Closets</h2>
+      <ScreenHeader text="Closets" />
       <div>
       {closetsData.closets.map((closet) => (
         <ClosetCard
