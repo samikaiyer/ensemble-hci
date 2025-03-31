@@ -1,0 +1,23 @@
+{
+    "closets": [
+      {
+        "title": "Roomies Closet",
+        "num_members": 5,
+        "num_items": 20,
+        "status": "member"
+      },
+      {
+        "title": "Jenna's Closet",
+        "num_members": 2,
+        "num_items": 12,
+        "status": "owner"
+      },
+      {
+        "title": "My Creation",
+        "num_members": 4,
+        "num_items": 10,
+        "status": "member"
+      }
+    ]
+  }
+  
