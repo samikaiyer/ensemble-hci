@@ -9,7 +9,7 @@ import "./App.css"
 
 function App() {
   return (
-    <Router>
+    <Router basename="/ensemble-hci">
       <div className="app-container">
         <div className="content">
           <Routes>
