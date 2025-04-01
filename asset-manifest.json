@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/ensemble-hci/static/css/main.3db90f69.css",
+    "main.js": "/ensemble-hci/static/js/main.c8249b5f.js",
+    "static/js/453.6de6d516.chunk.js": "/ensemble-hci/static/js/453.6de6d516.chunk.js",
+    "index.html": "/ensemble-hci/index.html",
+    "main.3db90f69.css.map": "/ensemble-hci/static/css/main.3db90f69.css.map",
+    "main.c8249b5f.js.map": "/ensemble-hci/static/js/main.c8249b5f.js.map",
+    "453.6de6d516.chunk.js.map": "/ensemble-hci/static/js/453.6de6d516.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.3db90f69.css",
+    "static/js/main.c8249b5f.js"
+  ]
+}
