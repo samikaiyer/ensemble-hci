@@ -3,48 +3,37 @@ import Card from "react-bootstrap/Card";
 import { Button, Modal, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import closetsData from "../closets.json";
+import "./Closets.css"; 
 
 function Closets() {
   const navigate = useNavigate();
-  const [show, setShow] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
+  const [showJoin, setShowJoin] = useState(false);
   const [closetName, setClosetName] = useState("");
+  const [joinCode, setJoinCode] = useState("");
 
-  const handleClose = () => {
-    setShow(false);
-    setClosetName(""); // Reset input on close
+  const handleCloseCreate = () => {
+    setShowCreate(false);
+    setClosetName("");
   };
 
-  const handleShow = () => setShow(true);
+  const handleCloseJoin = () => {
+    setShowJoin(false);
+    setJoinCode("");
+  };
 
   return (
     <div className="closetspage">
-      <header
-        style={{
-          backgroundColor: "#DF8EC1",
-          height: "60px",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          position: "relative",
-        }}
-      >
-        <h1 style={{ margin: 0, textAlign: "center", flexGrow: 1 }}>Closets</h1>
-        <Button
-          variant="outline-dark"
-          onClick={handleShow}
-          style={{
-            width: "30px",
-            height: "30px",
-            borderRadius: "50%",
-            position: "absolute",
-            right: "20px",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          +
-        </Button>
+      <header className="header">
+        <h1 className="header-title">Closets</h1>
+        <div className="button-container">
+          <Button variant="outline-dark" onClick={() => setShowJoin(true)}>
+            Join
+          </Button>
+          <Button variant="outline-dark" onClick={() => setShowCreate(true)}>
+            Create
+          </Button>
+        </div>
       </header>
 
       <div>
@@ -60,8 +49,7 @@ function Closets() {
         ))}
       </div>
 
-      {/* Modal */}
-      <Modal show={show} onHide={handleClose} centered>
+      <Modal show={showCreate} onHide={handleCloseCreate} centered>
         <Modal.Header closeButton>
           <Modal.Title>Create New Closet</Modal.Title>
         </Modal.Header>
@@ -71,6 +59,7 @@ function Closets() {
               <Form.Label>Closet Name</Form.Label>
               <Form.Control
                 type="text"
+                className="modal-input"
                 placeholder="Enter closet name"
                 value={closetName}
                 onChange={(e) => setClosetName(e.target.value)}
@@ -84,7 +73,40 @@ function Closets() {
             disabled={!closetName.trim()}
             onClick={() => {
               console.log("Closet Created:", closetName);
-              handleClose();
+              handleCloseCreate();
+            }}
+          >
+            Submit
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+
+      <Modal show={showJoin} onHide={handleCloseJoin} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Join Closet</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group>
+              <Form.Label>Enter Join Code</Form.Label>
+              <Form.Control
+                type="text"
+                className="modal-input"
+                placeholder="Enter join code"
+                value={joinCode}
+                onChange={(e) => setJoinCode(e.target.value)}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="primary"
+            disabled={!joinCode.trim()}
+            onClick={() => {
+              console.log("Joined Closet with code:", joinCode);
+              handleCloseJoin();
             }}
           >
             Submit
@@ -97,8 +119,8 @@ function Closets() {
 
 const ClosetCard = ({ title, members, items, status, onClick }) => {
   return (
-    <Card style={{ margin: "10px" }} onClick={onClick}>
-      <Card.Body className="closetcard">
+    <Card className="closet-card" onClick={onClick}>
+      <Card.Body>
         <Card.Title>
           {title}, {status}
         </Card.Title>

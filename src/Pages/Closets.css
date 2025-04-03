@@ -1,0 +1,31 @@
+.header {
+    background-color: #DF8EC1;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+  
+  .header-title {
+    margin: 0;
+    text-align: center;
+    flex-grow: 1;
+  }
+  
+  .button-container {
+    position: absolute;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+  }
+  
+  .closet-card {
+    margin: 10px;
+        background-color: #EACEE0;
+  }
+  
+  .modal-input {
+    width: 100%;
+  }
+  
