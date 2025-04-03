@@ -6,6 +6,7 @@ import Closets from "./Pages/Closets";
 import Post from "./Pages/Post";
 import Profile from "./Pages/Profile";
 import "./App.css"
+import IndividualCloset from "./Pages/IndividualCloset";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
             <Route path="/" element={<Closets />} />
             <Route path="/post" element={<Post />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/closet/:name" element={<IndividualCloset />} />
           </Routes>
         </div>
 
