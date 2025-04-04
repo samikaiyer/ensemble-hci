@@ -43,7 +43,7 @@ function Closets() {
     const newCloset = {
       id: generateClosetId(),
       title: closetName,
-      num_members: 0,
+      num_members: 1,
       num_items: 0,
       items: []
     };
@@ -58,17 +58,17 @@ function Closets() {
     });
   };
 
+  const clearClosets = () => {
+    setClosets([]); 
+  };
+
   return (
     <div className="closetspage">
       <header className="header">
         <h1 className="header-title">Closets</h1>
         <div className="button-container">
-          <Button variant="outline-dark" onClick={() => setShowCreate(true)}>
-            Create
-          </Button>
-          <Button variant="outline-dark" onClick={() => setShowJoin(true)}>
-            Join
-          </Button>
+          <Button variant="outline-dark" size="sm" onClick={() => setShowCreate(true)}>Create</Button>
+          <Button variant="outline-dark" size="sm" onClick={() => setShowJoin(true)}>Join</Button>
         </div>
       </header>
 
