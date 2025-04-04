@@ -1,21 +1,27 @@
-import React from "react";
-import { useParams } from "react-router-dom";
-import closetsData from "../closets.json";
-import ScreenHeader from "../components/ScreenHeader";
+import React from 'react';
+import { useParams, useLocation } from 'react-router-dom';  
+import ScreenHeader from '../components/ScreenHeader';  
 
 function IndividualCloset() {
-    const { name } = useParams();
-    const closet = closetsData.closets.find(c => c.title === decodeURIComponent(name));
+  const { name } = useParams(); 
+  const location = useLocation();  
+  const closets = location.state?.closets || []; 
+  const closet = closets.find(c => c.title === decodeURIComponent(name));
 
-    if (!closet) {
-        return <h2>Closet not found</h2>;
-    }
+  if (!closet) {
+    return <h2>Closet not found</h2>;
+  }
 
-      return (
-        <div>
-            <ScreenHeader text={closet.title} />
-        </div>
-      );
+  return (
+    <div>
+      <ScreenHeader text={closet.title} />
+      <div>
+        <h3>Closet Details</h3>
+        <p><strong>Members:</strong> {closet.num_members}</p>
+        <p><strong>Items:</strong> {closet.num_items}</p>
+      </div>
+    </div>
+  );
 }
 
 export default IndividualCloset;

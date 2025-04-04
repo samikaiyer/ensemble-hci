@@ -1,16 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Card from "react-bootstrap/Card";
 import { Button, Modal, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import closetsData from "../closets.json";
-import "./Closets.css"; 
+import "./Closets.css";
 
 function Closets() {
   const navigate = useNavigate();
+  const [closets, setClosets] = useState([]); 
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
   const [closetName, setClosetName] = useState("");
   const [joinCode, setJoinCode] = useState("");
+
+  useEffect(() => {
+    const storedClosets = JSON.parse(localStorage.getItem("closets"));
+    if (storedClosets) {
+      setClosets(storedClosets);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (closets.length > 0) {
+      localStorage.setItem("closets", JSON.stringify(closets));
+    }
+  }, [closets]);
+
+  const generateClosetId = () => {
+    return `closet-${Date.now()}`;
+  };
 
   const handleCloseCreate = () => {
     setShowCreate(false);
@@ -22,33 +39,53 @@ function Closets() {
     setJoinCode("");
   };
 
+  const handleCreateCloset = () => {
+    const newCloset = {
+      id: generateClosetId(),
+      title: closetName,
+      num_members: 0,
+      num_items: 0,
+      items: []
+    };
+
+    setClosets((prevClosets) => [...prevClosets, newCloset]);
+    handleCloseCreate();
+  };
+
+   const handleClosetClick = (closet) => {
+    navigate(`/closet/${encodeURIComponent(closet.title)}`, {
+      state: { closets: closets }
+    });
+  };
+
   return (
     <div className="closetspage">
       <header className="header">
         <h1 className="header-title">Closets</h1>
         <div className="button-container">
-          <Button variant="outline-dark" onClick={() => setShowJoin(true)}>
-            Join
-          </Button>
           <Button variant="outline-dark" onClick={() => setShowCreate(true)}>
             Create
+          </Button>
+          <Button variant="outline-dark" onClick={() => setShowJoin(true)}>
+            Join
           </Button>
         </div>
       </header>
 
       <div>
-        {closetsData.closets.map((closet) => (
+        {closets.map((closet) => (
           <ClosetCard
-            key={closet.title}
+            key={closet.id}
             title={closet.title}
+            code={closet.id}
             members={closet.num_members}
             items={closet.num_items}
-            status={closet.status}
-            onClick={() => navigate(`/closet/${encodeURIComponent(closet.title)}`)}
+            onClick={() => handleClosetClick(closet)}
           />
         ))}
       </div>
 
+      {/* Create Closet Modal */}
       <Modal show={showCreate} onHide={handleCloseCreate} centered>
         <Modal.Header closeButton>
           <Modal.Title>Create New Closet</Modal.Title>
@@ -71,17 +108,14 @@ function Closets() {
           <Button
             variant="primary"
             disabled={!closetName.trim()}
-            onClick={() => {
-              console.log("Closet Created:", closetName);
-              handleCloseCreate();
-            }}
+            onClick={handleCreateCloset}
           >
             Submit
           </Button>
         </Modal.Footer>
       </Modal>
 
-
+      {/* Join Closet Modal */}
       <Modal show={showJoin} onHide={handleCloseJoin} centered>
         <Modal.Header closeButton>
           <Modal.Title>Join Closet</Modal.Title>
@@ -117,13 +151,12 @@ function Closets() {
   );
 }
 
-const ClosetCard = ({ title, members, items, status, onClick }) => {
+const ClosetCard = ({ title, members, items, code, onClick }) => {
   return (
     <Card className="closet-card" onClick={onClick}>
       <Card.Body>
-        <Card.Title>
-          {title}, {status}
-        </Card.Title>
+        <Card.Title>{title}</Card.Title>
+        <Card.Text>Code: {code}</Card.Text>
         <Card.Text>{members} members</Card.Text>
         <Card.Text>{items} items</Card.Text>
       </Card.Body>
