@@ -123,7 +123,6 @@ function IndividualCloset() {
       {closet.items && closet.items.length > 0 ? (
           closet.items.map((item, index) => (
             <img 
-              key={index} 
               src={item.image} 
               alt={item.name} 
               className={`itemImage ${selectedItems.includes(item) ? 'selected' : ''}`} 
