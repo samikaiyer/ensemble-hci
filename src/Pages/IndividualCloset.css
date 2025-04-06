@@ -19,3 +19,14 @@
     border: 1px solid #000;
 }
 
+.pinkButton {
+    background-color: #DF8EC1;
+    border-color: #DF8EC1;
+    color: #fff;
+  }
+  
+  .pinkButton:hover {
+    background-color: #af7095;
+    border-color: #af7095;
+    color: #fff;
+  }
