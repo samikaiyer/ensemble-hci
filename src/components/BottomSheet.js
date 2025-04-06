@@ -35,7 +35,7 @@ function BottomSheet({
               >
                 <p className="outfitName">{outfit.name}</p>
                 <div className="outfitImages">
-                  {outfit.items.slice(0, 3).map((item, index) => (
+                  {outfit.items.map((item, index) => (
                     <img
                       key={index}
                       src={item.image}
