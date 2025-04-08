@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./Post.css"
+import "./Post.css";
 import ScreenHeader from "../components/ScreenHeader";
 import Select from "react-select";
 import Button from 'react-bootstrap/Button';
@@ -13,6 +13,7 @@ function Post() {
     ownerName: "",
     selectedClosets: [],
     image: null,
+    category: "", // Store category as a string
   });
 
   useEffect(() => {
@@ -36,6 +37,10 @@ function Post() {
     setFormData({ ...formData, image: e.target.files[0] });
   };
 
+  const handleCategoryChange = (selectedOption) => {
+    setFormData({ ...formData, category: selectedOption ? selectedOption.value : "" });
+  };
+
   const handleClear = () => {
     setFormData({
       name: "",
@@ -44,6 +49,7 @@ function Post() {
       ownerName: "",
       selectedClosets: [],
       image: null,
+      category: "", // Reset category on clear
     });
   };
 
@@ -54,7 +60,8 @@ function Post() {
       !formData.size.trim() ||
       !formData.ownerName.trim() ||
       formData.selectedClosets.length === 0 ||
-      !formData.image
+      !formData.image ||
+      !formData.category // Check if category is selected
     ) {
       alert("Please fill out all fields before posting.");
       return;
@@ -67,6 +74,7 @@ function Post() {
       size: formData.size,
       ownerName: formData.ownerName,
       image: URL.createObjectURL(formData.image),
+      category: formData.category, // Store the category as a string
     };
 
     const storedClosets = JSON.parse(localStorage.getItem("closets")) || [];
@@ -86,6 +94,12 @@ function Post() {
     alert("Item posted successfully!");
     handleClear();
   };
+
+  const categoryOptions = [
+    { value: "Top", label: "Top" },
+    { value: "Bottom", label: "Bottom" },
+    { value: "Other", label: "Other" },
+  ];
 
   return (
     <div className="postpage">
@@ -119,6 +133,14 @@ function Post() {
             closeMenuOnSelect={false} 
             value={formData.selectedClosets} 
             onChange={handleClosetChange} 
+          />
+        </div>
+        <div className="individualinputs">
+          <p><strong>Clothing Category</strong></p>
+          <Select
+            options={categoryOptions}
+            value={categoryOptions.find(option => option.value === formData.category) || null} // Match the category value to find the corresponding object
+            onChange={handleCategoryChange}
           />
         </div>
       </div>

@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';  
-import { useState, useEffect } from "react";
 import { Button, Modal } from 'react-bootstrap';
 import BottomSheet from '../components/BottomSheet'; // import the component we created
 import "./IndividualCloset.css";
@@ -27,13 +26,15 @@ function IndividualCloset() {
   const [showNameModal, setShowNameModal] = useState(false);
   const [newOutfitName, setNewOutfitName] = useState('');
 
+  // Add category filter state
+  const [categoryFilter, setCategoryFilter] = useState('All');
+
   // update local storage whenever outfits state changes
   useEffect(() => {
     localStorage.setItem('outfits', JSON.stringify(outfits));
   }, [outfits]);
 
   // toggle selection on click 
-  // TODO: hold down for first selection
   const toggleSelection = (item) => {
     if (selectedItems.includes(item)) {
       setSelectedItems(selectedItems.filter(i => i !== item));
@@ -105,6 +106,11 @@ function IndividualCloset() {
     return <h2>Closet not found</h2>;
   }
 
+  // Filter items based on category filter
+  const filteredItems = categoryFilter === 'All' 
+    ? closet.items 
+    : closet.items.filter(item => item.category === categoryFilter);
+
   return (
     <div>
       <header style={{ backgroundColor: "#DF8EC1", height: "200px", textAlign: "center", lineHeight: "60px", paddingTop: "3%" }}>
@@ -114,15 +120,36 @@ function IndividualCloset() {
             <p><strong>Items:</strong> {closet.num_items}</p>
         </div>
         <div className='infocontainer'>
-            <Button variant="outline-dark" size="lg">All Items</Button>
-            <Button variant="outline-dark" size="lg">Tops</Button>
-            <Button variant="outline-dark" size="lg">Bottoms</Button>
+            {/* Category Filter Buttons */}
+            <Button 
+              variant={categoryFilter === 'All' ? 'dark' : 'outline-dark'} 
+              size="lg"
+              onClick={() => setCategoryFilter('All')}
+            >
+              All Items
+            </Button>
+            <Button 
+              variant={categoryFilter === 'Top' ? 'dark' : 'outline-dark'} 
+              size="lg"
+              onClick={() => setCategoryFilter('Top')}
+            >
+              Tops
+            </Button>
+            <Button 
+              variant={categoryFilter === 'Bottom' ? 'dark' : 'outline-dark'} 
+              size="lg"
+              onClick={() => setCategoryFilter('Bottom')}
+            >
+              Bottoms
+            </Button>
         </div>
       </header>
+
       <div className='imagescontainer'>
-      {closet.items && closet.items.length > 0 ? (
-          closet.items.map((item, index) => (
+        {filteredItems.length > 0 ? (
+          filteredItems.map((item, index) => (
             <img 
+              key={index} 
               src={item.image} 
               alt={item.name} 
               className={`itemImage ${selectedItems.includes(item) ? 'selected' : ''}`} 
@@ -130,7 +157,7 @@ function IndividualCloset() {
             />
           ))
         ) : (
-          <p>No items in this closet</p>
+          <p>No items in this category</p>
         )}
       </div>
 
@@ -167,7 +194,6 @@ function IndividualCloset() {
           </Button>
         </Modal.Footer>
       </Modal>
-
     </div>
   );
 }
