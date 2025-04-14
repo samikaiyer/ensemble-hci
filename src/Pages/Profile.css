@@ -42,3 +42,17 @@
     gap: 8px;
     padding-bottom: 8px;
 }
+
+.logoutButton {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #DF8EC1;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .logoutButton:hover {
+    background-color: #af7095;
+  }

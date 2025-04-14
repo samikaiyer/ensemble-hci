@@ -5,16 +5,19 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import { db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import { auth } from '../firebase';
+import { signOut } from 'firebase/auth';
 
 const GetUsername = () => {
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
 
   useEffect(() => {
-    // Fetch the 'username' from 'user1' document in 'users' collection
     const fetchUsername = async () => {
+      const user = auth.currentUser;
       try {
-        const userDoc = await getDoc(doc(db, 'users', 'user1'));
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
         if (userDoc.exists) {
           setUsername(userDoc.data().username);
           setDisplayName(userDoc.data().displayName);
@@ -37,6 +40,15 @@ const GetUsername = () => {
     </div>
     
   );
+};
+
+const logoutUser = async () => {
+  try {
+    await signOut(auth);
+    console.log("User logged out");
+  } catch (error) {
+    console.error("Error logging out:", error);
+  }
 };
 
 function Profile() {
@@ -70,6 +82,7 @@ function Profile() {
         </div>
         <div className="col-7 profileContainer"> 
             <GetUsername></GetUsername>
+            <button onClick={logoutUser} className="logoutButton">Logout</button>
           <div className="row">
             <div className="col-4">
               <p>{numClosets} Closets</p>
