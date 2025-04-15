@@ -38,7 +38,6 @@ function App() {
         <Navbar className="navbar" fixed="bottom" variant="light">
           <Nav className="w-100 d-flex justify-content-around">
             <Nav.Link as={Link} to="/">Closets</Nav.Link>
-            <Nav.Link as={Link} to="/post">Post</Nav.Link>
             <Nav.Link as={Link} to="/profile">Profile</Nav.Link>
           </Nav>
         </Navbar>

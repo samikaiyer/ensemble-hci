@@ -3,8 +3,11 @@ import "./Post.css";
 import ScreenHeader from "../components/ScreenHeader";
 import Select from "react-select";
 import Button from 'react-bootstrap/Button';
+import { useNavigate } from 'react-router-dom';
+
 
 function Post() {
+  const navigate = useNavigate();
   const [closets, setClosets] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
@@ -93,7 +96,8 @@ function Post() {
 
     alert("Item posted successfully!");
     handleClear();
-  };
+    navigate(-1, { state: { refresh: true } });
+    };
 
   const categoryOptions = [
     { value: "Top", label: "Top" },

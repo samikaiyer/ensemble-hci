@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useLocation } from 'react-router-dom';  
+import { useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Button, Modal } from 'react-bootstrap';
 import BottomSheet from '../components/BottomSheet'; // import the component we created
 import "./IndividualCloset.css";
 
 function IndividualCloset() {
   const { name } = useParams(); 
-  const location = useLocation();  
-  const closets = location.state?.closets || []; 
-  const closet = closets.find(c => c.title === decodeURIComponent(name));
+  const [closet, setCloset] = useState(null);
+
+  useEffect(() => {
+    const storedClosets = JSON.parse(localStorage.getItem('closets')) || [];
+    const foundCloset = storedClosets.find(c => c.title === decodeURIComponent(name));
+    setCloset(foundCloset);
+  }, [name]);
 
   // load outfits
   const [outfits, setOutfits] = useState(() => {
@@ -113,8 +118,13 @@ function IndividualCloset() {
 
   return (
     <div>
-      <header style={{ backgroundColor: "#DF8EC1", height: "200px", textAlign: "center", lineHeight: "60px", paddingTop: "3%" }}>
-        <h1>{closet.title}</h1>
+      <header style={{ backgroundColor: "#DF8EC1", height: "250px", textAlign: "center", lineHeight: "50px", paddingTop: "3%" }}>
+        <div>
+          <h1>{closet.title}</h1>
+          <Link to="/post">
+            <Button variant="outline-dark">Add New Item</Button>
+          </Link>
+        </div>
         <div className='infocontainer'>
             <p><strong>Members:</strong> {closet.num_members}</p>
             <p><strong>Items:</strong> {closet.num_items}</p>
