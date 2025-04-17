@@ -1,6 +1,6 @@
 .profilePicture {
-    width: 150px; 
-    height: 150px;
+    width: 130px; 
+    height: 130px;
     border-radius: 50%; 
     object-fit: cover;
 }
@@ -13,7 +13,9 @@
    display: flex;
    justify-content: center;
    align-items: center;
-   padding: 5%;
+   padding: 4%;
+   width: 100%;
+  box-sizing: border-box;  /* so that your 5% padding is included inside the 100% */
 }
 
 .outfitsContainer {
@@ -44,15 +46,23 @@
 }
 
 .logoutButton {
-    margin-top: 20px;
-    padding: 10px 20px;
+    padding: 3px 10px;
     background-color: #DF8EC1;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-  }
+    margin-top: 0%;
+}
   
-  .logoutButton:hover {
+.logoutButton:hover {
     background-color: #af7095;
-  }
+}
+
+.usernameContainer {
+    padding-top: 10%;
+}
+
+.username {
+    margin-bottom: 0%;
+}

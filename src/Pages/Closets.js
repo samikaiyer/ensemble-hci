@@ -2,33 +2,52 @@ import React, { useState, useEffect } from "react";
 import Card from "react-bootstrap/Card";
 import { Button, Modal, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  arrayUnion
+} from "firebase/firestore";
+import { db, auth } from "../firebase";
 import "./Closets.css";
 
-function Closets() {
+export default function Closets() {
   const navigate = useNavigate();
-  const [closets, setClosets] = useState([]); 
+  const user = auth.currentUser;
+  const [closets, setClosets] = useState([]);
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
   const [closetName, setClosetName] = useState("");
   const [joinCode, setJoinCode] = useState("");
 
+  // Subscribe to closets where the current user is a member
   useEffect(() => {
-    // localStorage.removeItem("closets");
-    const storedClosets = JSON.parse(localStorage.getItem("closets"));
-    if (storedClosets) {
-      setClosets(storedClosets);
-    }
-  }, []);
+    if (!user) return;
+    const q = query(
+      collection(db, "closets"),
+      where("members", "array-contains", user.uid)
+    );
+    const unsubscribe = onSnapshot(q, snapshot => {
+      const data = snapshot.docs.map(docSnap => {
+        const d = docSnap.data();
+        return {
+          id: docSnap.id,
+          title: d.title,
+          members: d.members || [],
+          items: d.items || []
+        };
+      });
+      setClosets(data);
+    });
+    return unsubscribe;
+  }, [user]);
 
-  useEffect(() => {
-    if (closets.length > 0) {
-      localStorage.setItem("closets", JSON.stringify(closets));
-    }
-  }, [closets]);
-
-  const generateClosetId = () => {
-    return `closet-${Date.now()}`;
-  };
+  const generateClosetId = () => `closet-${Date.now()}`;
 
   const handleCloseCreate = () => {
     setShowCreate(false);
@@ -40,27 +59,34 @@ function Closets() {
     setJoinCode("");
   };
 
-  const handleCreateCloset = () => {
-    const newCloset = {
-      id: generateClosetId(),
+  // Create a new closet in Firestore
+  const handleCreateCloset = async () => {
+    const id = generateClosetId();
+    const ref = doc(db, "closets", id);
+    await setDoc(ref, {
       title: closetName,
-      num_members: 1,
-      num_items: 0,
+      members: [user.uid],
       items: []
-    };
-
-    setClosets((prevClosets) => [...prevClosets, newCloset]);
+    });
     handleCloseCreate();
   };
 
-   const handleClosetClick = (closet) => {
-    navigate(`/closet/${encodeURIComponent(closet.title)}`, {
-      state: { closets: closets }
-    });
+  // Join an existing closet
+  const handleJoinCloset = async () => {
+    const ref = doc(db, "closets", joinCode.trim());
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+      alert("Closet not found");
+    } else {
+      await updateDoc(ref, {
+        members: arrayUnion(user.uid)
+      });
+      handleCloseJoin();
+    }
   };
 
-  const clearClosets = () => {
-    setClosets([]); 
+  const handleClosetClick = closet => {
+    navigate(`/closet/${closet.id}`);
   };
 
   return (
@@ -68,19 +94,23 @@ function Closets() {
       <header className="header">
         <h1 className="header-title">Closets</h1>
         <div className="button-container">
-          <Button variant="outline-dark" size="sm" onClick={() => setShowCreate(true)}>Create</Button>
-          <Button variant="outline-dark" size="sm" onClick={() => setShowJoin(true)}>Join</Button>
+          <Button variant="outline-dark" size="sm" onClick={() => setShowCreate(true)}>
+            Create
+          </Button>
+          <Button variant="outline-dark" size="sm" onClick={() => setShowJoin(true)}>
+            Join
+          </Button>
         </div>
       </header>
 
-      <div>
-        {closets.map((closet) => (
+      <div className="closet-list">
+        {closets.map(closet => (
           <ClosetCard
             key={closet.id}
             title={closet.title}
             code={closet.id}
-            members={closet.num_members}
-            items={closet.num_items}
+            members={closet.members.length}
+            items={closet.items.length}
             onClick={() => handleClosetClick(closet)}
           />
         ))}
@@ -100,17 +130,13 @@ function Closets() {
                 className="modal-input"
                 placeholder="Enter closet name"
                 value={closetName}
-                onChange={(e) => setClosetName(e.target.value)}
+                onChange={e => setClosetName(e.target.value)}
               />
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button
-            variant="primary"
-            disabled={!closetName.trim()}
-            onClick={handleCreateCloset}
-          >
+          <Button variant="primary" disabled={!closetName.trim()} onClick={handleCreateCloset}>
             Submit
           </Button>
         </Modal.Footer>
@@ -130,20 +156,13 @@ function Closets() {
                 className="modal-input"
                 placeholder="Enter join code"
                 value={joinCode}
-                onChange={(e) => setJoinCode(e.target.value)}
+                onChange={e => setJoinCode(e.target.value)}
               />
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button
-            variant="primary"
-            disabled={!joinCode.trim()}
-            onClick={() => {
-              console.log("Joined Closet with code:", joinCode);
-              handleCloseJoin();
-            }}
-          >
+          <Button variant="primary" disabled={!joinCode.trim()} onClick={handleJoinCloset}>
             Submit
           </Button>
         </Modal.Footer>
@@ -152,7 +171,8 @@ function Closets() {
   );
 }
 
-const ClosetCard = ({ title, members, items, code, onClick }) => {
+// Presentational component
+function ClosetCard({ title, members, items, code, onClick }) {
   return (
     <Card className="closet-card" onClick={onClick}>
       <Card.Body>
@@ -163,6 +183,4 @@ const ClosetCard = ({ title, members, items, code, onClick }) => {
       </Card.Body>
     </Card>
   );
-};
-
-export default Closets;
+}

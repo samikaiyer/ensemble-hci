@@ -30,7 +30,7 @@ function App() {
         <Route path="/" element={<PrivateRoute><Closets /></PrivateRoute>} />
         <Route path="/post" element={<PrivateRoute><Post /></PrivateRoute>} />
         <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-        <Route path="/closet/:name" element={<PrivateRoute><IndividualCloset /></PrivateRoute>} />
+        <Route path="/closet/:id" element={<PrivateRoute><IndividualCloset /></PrivateRoute>} />
       </Routes>
       </div>
 

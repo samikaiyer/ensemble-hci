@@ -3,8 +3,19 @@ import "./Post.css";
 import ScreenHeader from "../components/ScreenHeader";
 import Select from "react-select";
 import Button from 'react-bootstrap/Button';
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  doc,
+  updateDoc,
+  arrayUnion,
+  increment
+} from 'firebase/firestore';
+import { db, auth } from '../firebase';
 
-function Post() {
+export default function Post() {
   const [closets, setClosets] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
@@ -13,32 +24,42 @@ function Post() {
     ownerName: "",
     selectedClosets: [],
     image: null,
-    category: "", 
+    category: "",
   });
 
+  // Load only closets the user is a member of
   useEffect(() => {
-    const storedClosets = JSON.parse(localStorage.getItem("closets")) || [];
-    const closetOptions = storedClosets.map((closet) => ({
-      value: closet.id,
-      label: closet.title,
-    }));
-    setClosets(closetOptions);
+    async function fetchClosets() {
+      const user = auth.currentUser;
+      if (!user) return;
+      const q = query(
+        collection(db, 'closets'),
+        where('members', 'array-contains', user.uid)
+      );
+      const snap = await getDocs(q);
+      const options = snap.docs.map(docSnap => ({
+        value: docSnap.id,
+        label: docSnap.data().title
+      }));
+      setClosets(options);
+    }
+    fetchClosets();
   }, []);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleClosetChange = (selectedOptions) => {
+  const handleClosetChange = selectedOptions => {
     setFormData({ ...formData, selectedClosets: selectedOptions });
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = e => {
     setFormData({ ...formData, image: e.target.files[0] });
   };
 
-  const handleCategoryChange = (selectedOption) => {
-    setFormData({ ...formData, category: selectedOption ? selectedOption.value : "" });
+  const handleCategoryChange = option => {
+    setFormData({ ...formData, category: option ? option.value : "" });
   };
 
   const handleClear = () => {
@@ -54,50 +75,48 @@ function Post() {
   };
 
   const handlePost = () => {
+    const { name, description, size, ownerName, selectedClosets, image, category } = formData;
     if (
-      !formData.name.trim() ||
-      !formData.description.trim() ||
-      !formData.size.trim() ||
-      !formData.ownerName.trim() ||
-      formData.selectedClosets.length === 0 ||
-      !formData.image ||
-      !formData.category
+      !name.trim() ||
+      !description.trim() ||
+      !size.trim() ||
+      !ownerName.trim() ||
+      selectedClosets.length === 0 ||
+      !image ||
+      !category
     ) {
       alert("Please fill out all fields before posting.");
       return;
     }
 
     const reader = new FileReader();
-    reader.onloadend = () => {
+    reader.onloadend = async () => {
       const newItem = {
         id: `item-${Date.now()}`,
-        name: formData.name,
-        description: formData.description,
-        size: formData.size,
-        ownerName: formData.ownerName,
-        image: reader.result, // Base64 image
-        category: formData.category,
+        name,
+        description,
+        size,
+        ownerName,
+        image: reader.result,
+        category
       };
 
-      const storedClosets = JSON.parse(localStorage.getItem("closets")) || [];
-      const updatedClosets = storedClosets.map((closet) => {
-        if (formData.selectedClosets.some((selected) => selected.value === closet.id)) {
-          return {
-            ...closet,
-            num_items: closet.num_items + 1,
-            items: [...closet.items, newItem],
-          };
+      try {
+        for (const sel of selectedClosets) {
+          const closetRef = doc(db, 'closets', sel.value);
+          await updateDoc(closetRef, {
+            items: arrayUnion(newItem),
+            num_items: increment(1)
+          });
         }
-        return closet;
-      });
-
-      localStorage.setItem("closets", JSON.stringify(updatedClosets));
-
-      alert("Item posted successfully!");
-      handleClear();
+        alert("Item posted successfully!");
+        handleClear();
+      } catch (error) {
+        console.error("Error adding item to closets:", error);
+        alert("Failed to post item.");
+      }
     };
-
-    reader.readAsDataURL(formData.image);
+    reader.readAsDataURL(image);
   };
 
   const categoryOptions = [
@@ -132,33 +151,27 @@ function Post() {
         </div>
         <div className="individualinputs">
           <p><strong>Choose Closets</strong></p>
-          <Select 
-            isMulti 
-            options={closets} 
-            closeMenuOnSelect={false} 
-            value={formData.selectedClosets} 
-            onChange={handleClosetChange} 
+          <Select
+            isMulti
+            options={closets}
+            closeMenuOnSelect={false}
+            value={formData.selectedClosets}
+            onChange={handleClosetChange}
           />
         </div>
         <div className="individualinputs">
           <p><strong>Clothing Category</strong></p>
           <Select
             options={categoryOptions}
-            value={categoryOptions.find(option => option.value === formData.category) || null}
+            value={categoryOptions.find(opt => opt.value === formData.category) || null}
             onChange={handleCategoryChange}
           />
         </div>
       </div>
       <span className="buttoncontainer">
-        <Button variant="light" className="clearbutton" onClick={handleClear}>
-          Clear
-        </Button>
-        <Button variant="light" className="postbutton" onClick={handlePost}>
-          Post
-        </Button>
+        <Button variant="light" className="clearbutton" onClick={handleClear}>Clear</Button>
+        <Button variant="light" className="postbutton" onClick={handlePost}>Post</Button>
       </span>
     </div>
   );
 }
-
-export default Post;

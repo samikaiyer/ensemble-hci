@@ -1,235 +1,183 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Button, Modal } from 'react-bootstrap';
-import BottomSheet from '../components/BottomSheet'; // import the component we created
-import "./IndividualCloset.css";
+import BottomSheet from '../components/BottomSheet';
+import {
+  doc,
+  onSnapshot,
+  collection,
+  setDoc,
+  updateDoc,
+  arrayUnion
+} from 'firebase/firestore';
+import { db, auth } from '../firebase';
+import './IndividualCloset.css';
 
-function IndividualCloset() {
-  const { name } = useParams(); 
-  const location = useLocation();  
-  const closets = location.state?.closets || []; 
-  const closet = closets.find(c => c.title === decodeURIComponent(name));
+export default function IndividualCloset() {
+  const { id } = useParams();             // closet document ID
+  const user = auth.currentUser;
 
-  // load outfits
-  const [outfits, setOutfits] = useState(() => {
-    const stored = localStorage.getItem('outfits');
-    return stored ? JSON.parse(stored) : [];
-  });
+  // Closet data
+  const [closet, setCloset] = useState();
 
-  // track selected items
+  // User-specific outfits stored in Firestore
+  const [outfits, setOutfits] = useState([]);
+
+  // UI state
   const [selectedItems, setSelectedItems] = useState([]);
-
-  // visibility of the bottom sheet
   const [showSheet, setShowSheet] = useState(false);
-
-  // visibility of the outfit name prompt modal
   const [showNameModal, setShowNameModal] = useState(false);
   const [newOutfitName, setNewOutfitName] = useState('');
-
-  // item details modal
   const [showItemModal, setShowItemModal] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
-
-  // Add category filter state
   const [categoryFilter, setCategoryFilter] = useState('All');
 
-  // update local storage whenever outfits state changes
+  // subscribe to closet
   useEffect(() => {
-    localStorage.setItem('outfits', JSON.stringify(outfits));
-  }, [outfits]);
+    if (!id) return;
+    const ref = doc(db, 'closets', id);
+    const unsub = onSnapshot(ref, snap => {
+      if (snap.exists()) setCloset({ id: snap.id, ...snap.data() });
+      else setCloset(null);
+    });
+    return unsub;
+  }, [id]);
 
-  // toggle selection on click 
-  const toggleSelection = (item) => {
-    if (selectedItems.includes(item)) {
-      setSelectedItems(selectedItems.filter(i => i !== item));
-    } else {
-      setSelectedItems([...selectedItems, item]);
-    }
-  };
-
-  // auto open bottom sheet when at least one item is selected
+  // subscribe to user outfits
   useEffect(() => {
-    if (selectedItems.length > 0) {
-      setShowSheet(true);
-    }
+    if (!id || !user) return;
+    const outfitsCol = collection(db, 'closets', id, 'userOutfits', user.uid, 'outfits');
+    const unsub = onSnapshot(outfitsCol, snapshot => {
+      const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      setOutfits(list);
+    });
+    return unsub;
+  }, [id, user]);
+
+  // open bottom sheet when items selected
+  useEffect(() => {
+    setShowSheet(selectedItems.length > 0);
   }, [selectedItems]);
 
-  // Handle adding selected items to an existing outfit
-  const handleAddToOutfit = (outfitId, items) => {
-    const updatedOutfits = outfits.map((outfit) => {
-      if (outfit.id === outfitId) {
-        const filteredItems = items.filter((item) =>
-          !outfit.items.some(
-            (existingItem) =>
-              (item.id && existingItem.id === item.id) ||
-              (!item.id && existingItem.name === item.name)
-          )
-        );
+  const toggleSelection = item => {
+    setSelectedItems(prev =>
+      prev.some(i => i.id === item.id)
+        ? prev.filter(i => i.id !== item.id)
+        : [...prev, item]
+    );
+  };
 
-        if (filteredItems.length === 0) {
-          alert("Selected item(s) are already in the outfit");
-          return outfit;
-        }
+  // Create a new outfit 
+  const handleConfirmCreateOutfit = async () => {
+    if (!newOutfitName.trim()) return alert('Outfit name is required');
+    const outfitId = `outfit-${Date.now()}`;
+    const outfitRef = doc(db, 'closets', id, 'userOutfits', user.uid, 'outfits', outfitId);
+    const newOutfit = { name: newOutfitName, items: selectedItems };
+    await setDoc(outfitRef, newOutfit);
+    setNewOutfitName('');
+    setSelectedItems([]);
+    setShowNameModal(false);
+  };
 
-        return { ...outfit, items: [...outfit.items, ...filteredItems] };
-      }
-      return outfit;
-    });
-    setOutfits(updatedOutfits);
+  // add to existing outfit
+  const handleAddToOutfit = async outfitId => {
+    const filtered = selectedItems.filter(item =>
+      !outfits.find(o => o.id === outfitId).items.some(i => i.id === item.id)
+    );
+    if (filtered.length === 0) {
+      alert('Selected item(s) already in outfit');
+      return;
+    }
+    const outfitRef = doc(db, 'closets', id, 'userOutfits', user.uid, 'outfits', outfitId);
+    
+    for (let item of filtered) {
+      await updateDoc(outfitRef, { items: arrayUnion(item) });
+    }
     setSelectedItems([]);
     setShowSheet(false);
   };
 
-  // creating a new outfit -> prompt the user for a name.
-  const promptNewOutfitName = () => {
-    setShowSheet(false); 
-    setShowNameModal(true);
-  };
+  if (closet === undefined) return <h2>Loading...</h2>;
+  if (closet === null) return <h2>Closet not found</h2>;
 
-  // Confirm the creation of a new outfit with the entered name
-  const handleConfirmCreateOutfit = () => {
-    if (!newOutfitName.trim()) {
-      alert("Outfit name is required");
-      return;
-    }
-    const newOutfit = {
-      id: Date.now(), 
-      name: newOutfitName,
-      items: selectedItems
-    };
-    setOutfits([...outfits, newOutfit]);
-    setSelectedItems([]);
-    setShowNameModal(false);
-    setNewOutfitName('');
-  };
-
-  if (!closet) {
-    return <h2>Closet not found</h2>;
-  }
-
-  // Filter items based on category filter
-  const filteredItems = categoryFilter === 'All' 
-    ? closet.items 
-    : closet.items.filter(item => item.category === categoryFilter);
+  // Filter items by category
+  const filteredItems =
+    categoryFilter === 'All'
+      ? closet.items || []
+      : (closet.items || []).filter(i => i.category === categoryFilter);
 
   return (
     <div>
-      <header style={{ backgroundColor: "#DF8EC1", height: "200px", textAlign: "center", lineHeight: "60px", paddingTop: "3%" }}>
+      <header style={{ backgroundColor: '#DF8EC1', height: '200px', textAlign: 'center', lineHeight: '60px', paddingTop: '3%' }}>
         <h1>{closet.title}</h1>
         <div className='infocontainer'>
-            <p><strong>Members:</strong> {closet.num_members}</p>
-            <p><strong>Items:</strong> {closet.num_items}</p>
+          <p><strong>Members:</strong> {Array.isArray(closet.members) ? closet.members.length : 0}</p>
+          <p><strong>Items:</strong> {Array.isArray(closet.items) ? closet.items.length : 0}</p>
         </div>
         <div className='infocontainer'>
-            <Button 
-              variant={categoryFilter === 'All' ? 'dark' : 'outline-dark'} 
-              size="lg"
-              onClick={() => setCategoryFilter('All')}
-            >
-              All Items
-            </Button>
-            <Button 
-              variant={categoryFilter === 'Top' ? 'dark' : 'outline-dark'} 
-              size="lg"
-              onClick={() => setCategoryFilter('Top')}
-            >
-              Tops
-            </Button>
-            <Button 
-              variant={categoryFilter === 'Bottom' ? 'dark' : 'outline-dark'} 
-              size="lg"
-              onClick={() => setCategoryFilter('Bottom')}
-            >
-              Bottoms
-            </Button>
+          {['All', 'Top', 'Bottom'].map(cat => (
+            <Button
+              key={cat}
+              variant={categoryFilter === cat ? 'dark' : 'outline-dark'}
+              size='lg'
+              onClick={() => setCategoryFilter(cat)}
+            >{cat}{cat === 'All' ? ' Items' : ` ${cat}s`}</Button>
+          ))}
         </div>
       </header>
 
       <div className='imagescontainer'>
-        {filteredItems.length > 0 ? (
-          filteredItems.map((item, index) => (
-            <div key={index} className="itemCard">
-              <img 
-                src={item.image} 
-                alt={item.name} 
-                className={`itemImage ${selectedItems.includes(item) ? 'selected' : ''}`} 
-                onClick={() => toggleSelection(item)}
-              />
-              <Button 
-                variant="light" 
-                size="sm" 
-                className="detailsButton"
-                onClick={() => {
-                  setCurrentItem(item);
-                  setShowItemModal(true);
-                }}
-              >
-                See Details
-              </Button>
-            </div>
-          ))
-        ) : (
-          <p>No items in this category</p>
-        )}
+        {filteredItems.length > 0 ? filteredItems.map(item => (
+          <div key={item.id} className='itemCard'>
+            <img
+              src={item.image}
+              alt={item.name}
+              className={`itemImage ${selectedItems.some(i => i.id === item.id) ? 'selected' : ''}`}
+              onClick={() => toggleSelection(item)}
+            />
+            <Button variant='light' size='sm' className='detailsButton' onClick={() => { setCurrentItem(item); setShowItemModal(true); }}>
+              See Details
+            </Button>
+          </div>
+        )) : <p>No items in this category</p>}
       </div>
 
-      {/* bottom sheet for "Add to Outfit" */}
       <BottomSheet
         open={showSheet}
         onClose={() => setShowSheet(false)}
         selectedItems={selectedItems}
         existingOutfits={outfits}
         onAddToOutfit={handleAddToOutfit}
-        onCreateOutfit={promptNewOutfitName}
+        onCreateOutfit={() => { setShowSheet(false); setShowNameModal(true); }}
       />
 
-      <Modal show={showNameModal} onHide={() => { setShowNameModal(false); setNewOutfitName(''); }} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Name New Outfit</Modal.Title>
-        </Modal.Header>
+      {/* New Outfit Modal */}
+      <Modal show={showNameModal} onHide={() => setShowNameModal(false)} centered>
+        <Modal.Header closeButton><Modal.Title>Name New Outfit</Modal.Title></Modal.Header>
         <Modal.Body>
-          <input 
-            type="text"
-            className="form-control"
-            placeholder="Enter outfit name"
-            value={newOutfitName}
-            onChange={(e) => setNewOutfitName(e.target.value)}
-          />
+          <input type='text' className='form-control' placeholder='Enter outfit name'
+            value={newOutfitName} onChange={e => setNewOutfitName(e.target.value)} />
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => { setShowNameModal(false); setNewOutfitName(''); }}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleConfirmCreateOutfit} className="pinkButton">
-            Create Outfit
-          </Button>
+          <Button variant='secondary' onClick={() => setShowNameModal(false)}>Cancel</Button>
+          <Button variant='primary' className='pinkButton' onClick={handleConfirmCreateOutfit}>Create Outfit</Button>
         </Modal.Footer>
       </Modal>
 
-      {/* item details modal */}
+      {/* Item Details Modal */}
       <Modal show={showItemModal} onHide={() => setShowItemModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>{currentItem?.name || "Item Details"}</Modal.Title>
-        </Modal.Header>
+        <Modal.Header closeButton><Modal.Title>{currentItem?.name}</Modal.Title></Modal.Header>
         <Modal.Body>
-          <img 
-            src={currentItem?.image} 
-            alt={currentItem?.name} 
-            style={{ width: '100%', borderRadius: '8px', marginBottom: '10px' }} 
-          />
+          <img src={currentItem?.image} alt={currentItem?.name} style={{ width: '100%', borderRadius: 8, marginBottom: 10 }} />
           <p><strong>Category:</strong> {currentItem?.category}</p>
           <p><strong>Description:</strong> {currentItem?.description || 'No description available.'}</p>
           <p><strong>Size:</strong> {currentItem?.size}</p>
           <p><strong>Owner Name:</strong> {currentItem?.ownerName}</p>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowItemModal(false)}>
-            Close
-          </Button>
+          <Button variant='secondary' onClick={() => setShowItemModal(false)}>Close</Button>
         </Modal.Footer>
       </Modal>
     </div>
   );
 }
-
-export default IndividualCloset;
