@@ -13,6 +13,7 @@ function Closets() {
   const [joinCode, setJoinCode] = useState("");
 
   useEffect(() => {
+    // localStorage.removeItem("closets");
     const storedClosets = JSON.parse(localStorage.getItem("closets"));
     if (storedClosets) {
       setClosets(storedClosets);

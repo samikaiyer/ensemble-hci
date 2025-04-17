@@ -49,7 +49,7 @@ function Post() {
       ownerName: "",
       selectedClosets: [],
       image: null,
-      category: "", // Reset category on clear
+      category: "",
     });
   };
 
@@ -61,38 +61,43 @@ function Post() {
       !formData.ownerName.trim() ||
       formData.selectedClosets.length === 0 ||
       !formData.image ||
-      !formData.category // Check if category is selected
+      !formData.category
     ) {
       alert("Please fill out all fields before posting.");
       return;
     }
 
-    const newItem = {
-      id: `item-${Date.now()}`,
-      name: formData.name,
-      description: formData.description,
-      size: formData.size,
-      ownerName: formData.ownerName,
-      image: URL.createObjectURL(formData.image),
-      category: formData.category, // Store the category as a string
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const newItem = {
+        id: `item-${Date.now()}`,
+        name: formData.name,
+        description: formData.description,
+        size: formData.size,
+        ownerName: formData.ownerName,
+        image: reader.result, // Base64 image
+        category: formData.category,
+      };
+
+      const storedClosets = JSON.parse(localStorage.getItem("closets")) || [];
+      const updatedClosets = storedClosets.map((closet) => {
+        if (formData.selectedClosets.some((selected) => selected.value === closet.id)) {
+          return {
+            ...closet,
+            num_items: closet.num_items + 1,
+            items: [...closet.items, newItem],
+          };
+        }
+        return closet;
+      });
+
+      localStorage.setItem("closets", JSON.stringify(updatedClosets));
+
+      alert("Item posted successfully!");
+      handleClear();
     };
 
-    const storedClosets = JSON.parse(localStorage.getItem("closets")) || [];
-    const updatedClosets = storedClosets.map((closet) => {
-      if (formData.selectedClosets.some((selected) => selected.value === closet.id)) {
-        return {
-          ...closet,
-          num_items: closet.num_items + 1,
-          items: [...closet.items, newItem],
-        };
-      }
-      return closet;
-    });
-
-    localStorage.setItem("closets", JSON.stringify(updatedClosets));
-
-    alert("Item posted successfully!");
-    handleClear();
+    reader.readAsDataURL(formData.image);
   };
 
   const categoryOptions = [
@@ -139,7 +144,7 @@ function Post() {
           <p><strong>Clothing Category</strong></p>
           <Select
             options={categoryOptions}
-            value={categoryOptions.find(option => option.value === formData.category) || null} // Match the category value to find the corresponding object
+            value={categoryOptions.find(option => option.value === formData.category) || null}
             onChange={handleCategoryChange}
           />
         </div>
