@@ -19,9 +19,22 @@
     border: 1px solid #000;
 }
 
-/* Visual cue for selected images */
+.itemCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 10px;
+    text-align: center;
+  }
+
+  .detailsButton {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    width: 100%;
+  }
+
 .itemImage.selected {
-    border: 3px solid #DF8EC1; /* Use your pink theme color */
+    border: 3px solid #DF8EC1; 
     transform: scale(0.98);
 }
 

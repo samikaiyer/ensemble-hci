@@ -13,7 +13,7 @@ function Post() {
     ownerName: "",
     selectedClosets: [],
     image: null,
-    category: "", // Store category as a string
+    category: "", 
   });
 
   useEffect(() => {

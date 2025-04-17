@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useLocation } from 'react-router-dom';  
+import { useParams, useLocation } from 'react-router-dom';
 import { Button, Modal } from 'react-bootstrap';
 import BottomSheet from '../components/BottomSheet'; // import the component we created
 import "./IndividualCloset.css";
@@ -25,6 +25,10 @@ function IndividualCloset() {
   // visibility of the outfit name prompt modal
   const [showNameModal, setShowNameModal] = useState(false);
   const [newOutfitName, setNewOutfitName] = useState('');
+
+  // item details modal
+  const [showItemModal, setShowItemModal] = useState(false);
+  const [currentItem, setCurrentItem] = useState(null);
 
   // Add category filter state
   const [categoryFilter, setCategoryFilter] = useState('All');
@@ -54,7 +58,6 @@ function IndividualCloset() {
   const handleAddToOutfit = (outfitId, items) => {
     const updatedOutfits = outfits.map((outfit) => {
       if (outfit.id === outfitId) {
-
         const filteredItems = items.filter((item) =>
           !outfit.items.some(
             (existingItem) =>
@@ -63,7 +66,6 @@ function IndividualCloset() {
           )
         );
 
-        // alert if duplicate item in outfit
         if (filteredItems.length === 0) {
           alert("Selected item(s) are already in the outfit");
           return outfit;
@@ -71,7 +73,6 @@ function IndividualCloset() {
 
         return { ...outfit, items: [...outfit.items, ...filteredItems] };
       }
-
       return outfit;
     });
     setOutfits(updatedOutfits);
@@ -120,7 +121,6 @@ function IndividualCloset() {
             <p><strong>Items:</strong> {closet.num_items}</p>
         </div>
         <div className='infocontainer'>
-            {/* Category Filter Buttons */}
             <Button 
               variant={categoryFilter === 'All' ? 'dark' : 'outline-dark'} 
               size="lg"
@@ -148,13 +148,25 @@ function IndividualCloset() {
       <div className='imagescontainer'>
         {filteredItems.length > 0 ? (
           filteredItems.map((item, index) => (
-            <img 
-              key={index} 
-              src={item.image} 
-              alt={item.name} 
-              className={`itemImage ${selectedItems.includes(item) ? 'selected' : ''}`} 
-              onClick={() => toggleSelection(item)}
-            />
+            <div key={index} className="itemCard">
+              <img 
+                src={item.image} 
+                alt={item.name} 
+                className={`itemImage ${selectedItems.includes(item) ? 'selected' : ''}`} 
+                onClick={() => toggleSelection(item)}
+              />
+              <Button 
+                variant="light" 
+                size="sm" 
+                className="detailsButton"
+                onClick={() => {
+                  setCurrentItem(item);
+                  setShowItemModal(true);
+                }}
+              >
+                See Details
+              </Button>
+            </div>
           ))
         ) : (
           <p>No items in this category</p>
@@ -171,7 +183,6 @@ function IndividualCloset() {
         onCreateOutfit={promptNewOutfitName}
       />
 
-      {/* modal prompting NEW outfit name */}
       <Modal show={showNameModal} onHide={() => { setShowNameModal(false); setNewOutfitName(''); }} centered>
         <Modal.Header closeButton>
           <Modal.Title>Name New Outfit</Modal.Title>
@@ -191,6 +202,29 @@ function IndividualCloset() {
           </Button>
           <Button variant="primary" onClick={handleConfirmCreateOutfit} className="pinkButton">
             Create Outfit
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* item details modal */}
+      <Modal show={showItemModal} onHide={() => setShowItemModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>{currentItem?.name || "Item Details"}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <img 
+            src={currentItem?.image} 
+            alt={currentItem?.name} 
+            style={{ width: '100%', borderRadius: '8px', marginBottom: '10px' }} 
+          />
+          <p><strong>Category:</strong> {currentItem?.category}</p>
+          <p><strong>Description:</strong> {currentItem?.description || 'No description available.'}</p>
+          <p><strong>Size:</strong> {currentItem?.size}</p>
+          <p><strong>Owner Name:</strong> {currentItem?.ownerName}</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowItemModal(false)}>
+            Close
           </Button>
         </Modal.Footer>
       </Modal>
