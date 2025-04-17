@@ -115,14 +115,27 @@ export default function IndividualCloset() {
           <p><strong>Items:</strong> {Array.isArray(closet.items) ? closet.items.length : 0}</p>
         </div>
         <div className='infocontainer'>
-          {['All', 'Top', 'Bottom'].map(cat => (
-            <Button
-              key={cat}
-              variant={categoryFilter === cat ? 'dark' : 'outline-dark'}
-              size='lg'
-              onClick={() => setCategoryFilter(cat)}
-            >{cat}{cat === 'All' ? ' Items' : ` ${cat}s`}</Button>
-          ))}
+            <Button 
+              variant={categoryFilter === 'All' ? 'dark' : 'outline-dark'} 
+              size="lg"
+              onClick={() => setCategoryFilter('All')}
+            >
+              All Items
+            </Button>
+            <Button 
+              variant={categoryFilter === 'Top' ? 'dark' : 'outline-dark'} 
+              size="lg"
+              onClick={() => setCategoryFilter('Top')}
+            >
+              Tops
+            </Button>
+            <Button 
+              variant={categoryFilter === 'Bottom' ? 'dark' : 'outline-dark'} 
+              size="lg"
+              onClick={() => setCategoryFilter('Bottom')}
+            >
+              Bottoms
+            </Button>
         </div>
       </header>
 
