@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Button, Modal } from 'react-bootstrap';
 import './Profile.css';
 import ScreenHeader from '../components/ScreenHeader';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -50,6 +51,8 @@ export default function Profile() {
   const user = auth.currentUser;
   const [closets, setClosets] = useState([]);
   const [outfits, setOutfits] = useState([]);
+  const [currentOutfit, setCurrentOutfit] = useState(null);
+  const [showOutfitModal, setShowOutfitModal] = useState(false);
 
   // Subscribe to closets where user is a member
   useEffect(() => {
@@ -124,9 +127,43 @@ export default function Profile() {
                 />
               ))}
             </div>
+            <Button variant='light' size='sm' className='detailsButton' onClick={() => { setCurrentOutfit(outfit); setShowOutfitModal(true); }}>
+              See Details
+            </Button>
           </div>
         ))}
       </div>
+      {/* Outfit Details Modal */}
+            <Modal show={showOutfitModal} onHide={() => setShowOutfitModal(false)} centered>
+              <Modal.Header closeButton><Modal.Title>{currentOutfit?.name}</Modal.Title></Modal.Header>
+              <Modal.Body>
+                <div className="outfitImages">
+                  {currentOutfit?.items.map(item => (
+                    <img
+                      key={item.id}
+                      src={item.image}
+                      alt={item.name}
+                      className="itemImage"
+                    />
+                  ))}
+                </div>
+                <p><strong>Items: </strong>{currentOutfit?.items.length}</p>
+                <ul>
+                  {currentOutfit?.items.map((item, index) => (
+                    <li key={index}>{item.name}</li>
+                  ))}
+                </ul>
+                <p><strong>Item Owners: </strong></p>
+                <ul>
+                  {currentOutfit?.items.map((item, index) => (
+                    <li key={index}>{item.ownerName}</li>
+                  ))}
+                </ul>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant='secondary' onClick={() => setShowOutfitModal(false)}>Close</Button>
+              </Modal.Footer>
+            </Modal>
     </div>
   );
 }
