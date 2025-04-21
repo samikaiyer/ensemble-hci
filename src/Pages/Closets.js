@@ -11,7 +11,8 @@ import {
   setDoc,
   getDoc,
   updateDoc,
-  arrayUnion
+  arrayUnion,
+  arrayRemove
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import "./Closets.css";
@@ -25,7 +26,6 @@ export default function Closets() {
   const [closetName, setClosetName] = useState("");
   const [joinCode, setJoinCode] = useState("");
 
-  // Subscribe to closets where the current user is a member
   useEffect(() => {
     if (!user) return;
     const q = query(
@@ -85,6 +85,14 @@ export default function Closets() {
     }
   };
 
+  // Leave closet 
+  const handleLeaveCloset = async (closetId) => {
+    const ref = doc(db, "closets", closetId);
+    await updateDoc(ref, {
+      members: arrayRemove(user.uid),
+    });
+  };
+
   const handleClosetClick = closet => {
     navigate(`/closet/${closet.id}`);
   };
@@ -112,11 +120,11 @@ export default function Closets() {
             members={closet.members.length}
             items={closet.items.length}
             onClick={() => handleClosetClick(closet)}
+            onLeave={() => handleLeaveCloset(closet.id)}
           />
         ))}
       </div>
 
-      {/* Create Closet Modal */}
       <Modal show={showCreate} onHide={handleCloseCreate} centered>
         <Modal.Header closeButton>
           <Modal.Title>Create New Closet</Modal.Title>
@@ -142,7 +150,6 @@ export default function Closets() {
         </Modal.Footer>
       </Modal>
 
-      {/* Join Closet Modal */}
       <Modal show={showJoin} onHide={handleCloseJoin} centered>
         <Modal.Header closeButton>
           <Modal.Title>Join Closet</Modal.Title>
@@ -171,15 +178,25 @@ export default function Closets() {
   );
 }
 
-// Presentational component
-function ClosetCard({ title, members, items, code, onClick }) {
+function ClosetCard({ title, members, items, code, onClick, onLeave }) {
   return (
-    <Card className="closet-card" onClick={onClick}>
+    <Card className="closet-card">
       <Card.Body>
-        <Card.Title>{title}</Card.Title>
-        <Card.Text>Code: {code}</Card.Text>
-        <Card.Text>{members} members</Card.Text>
-        <Card.Text>{items} items</Card.Text>
+        <div onClick={onClick}>
+          <div className="titlerow">
+            <Card.Title>{title}</Card.Title>
+            <Button variant="outline-danger" size="sm" onClick={(e) => {
+              e.stopPropagation();
+              onLeave();
+            }}>
+              Leave
+            </Button>
+          </div>
+          <Card.Text>Code: {code}</Card.Text>
+          <Card.Text>{members} members</Card.Text>
+          <Card.Text>{items} items</Card.Text>
+        </div>
+        
       </Card.Body>
     </Card>
   );

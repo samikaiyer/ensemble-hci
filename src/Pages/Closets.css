@@ -29,7 +29,8 @@
     width: 100%;
   }
 
-  .closetbuttons {
-    
+  .titlerow{
+    display: flex;
+    justify-content: space-between;
   }
   
