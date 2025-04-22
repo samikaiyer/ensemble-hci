@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Button, Modal } from 'react-bootstrap';
 import BottomSheet from '../components/BottomSheet';
 import {
@@ -108,8 +109,11 @@ export default function IndividualCloset() {
 
   return (
     <div>
-      <header style={{ backgroundColor: '#DF8EC1', height: '200px', textAlign: 'center', lineHeight: '60px', paddingTop: '3%' }}>
+      <header style={{ backgroundColor: '#DF8EC1', height: '250px', textAlign: 'center', lineHeight: '50px', paddingTop: '3%' }}>
         <h1>{closet.title}</h1>
+        <Link to="/post">
+          <Button variant="outline-dark">Add New Item</Button>
+        </Link>
         <div className='infocontainer'>
           <p><strong>Members:</strong> {Array.isArray(closet.members) ? closet.members.length : 0}</p>
           <p><strong>Items:</strong> {Array.isArray(closet.items) ? closet.items.length : 0}</p>

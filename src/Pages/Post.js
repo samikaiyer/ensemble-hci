@@ -3,6 +3,7 @@ import "./Post.css";
 import ScreenHeader from "../components/ScreenHeader";
 import Select from "react-select";
 import Button from 'react-bootstrap/Button';
+import { useNavigate } from 'react-router-dom';
 import {
   collection,
   getDocs,
@@ -16,6 +17,7 @@ import {
 import { db, auth } from '../firebase';
 
 export default function Post() {
+  const navigate = useNavigate();
   const [closets, setClosets] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
@@ -111,6 +113,7 @@ export default function Post() {
         }
         alert("Item posted successfully!");
         handleClear();
+        navigate(-1, { state: { refresh: true } });
       } catch (error) {
         console.error("Error adding item to closets:", error);
         alert("Failed to post item.");
